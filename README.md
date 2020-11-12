@@ -514,7 +514,7 @@ make sure in details api we will use following headers as listed bellow:
 
 Here is Routes URL with Verb:
 
-Now simply you can run above listed url like as bellow screen shot:
+Now simply you can run above listed url like:
 
 - **User Register API:** Verb:POST, URL: http://127.0.0.1:8000/api/v1/register
 - **User Login API:** Verb:POST, URL: http://127.0.0.1:8000/api/v1/login
