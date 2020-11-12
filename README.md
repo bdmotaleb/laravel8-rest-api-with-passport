@@ -331,8 +331,8 @@ class LoginController extends Controller
             $message          = 'Yay! A user has been successfully created.';
             $success['token'] = $user->createToken('accessToken')->accessToken;
         } catch (Exception $e) {
-            $success['token'] = false;
-            $message          = $e->getMessage();
+            $success['token'] = [];
+            $message          = 'Oops! Unable to create a new user.';
         }
 
         return sendResponse($success, $message);
@@ -348,7 +348,7 @@ This is a very important step of creating rest api in laravel 8. you can use elo
 
 Now there created a new file with a new folder on following path:
 
-``app/Http/Resources/Post.php``
+``app/Http/Resources/PostResource.php``
 
 ```
 <?php
@@ -405,6 +405,12 @@ class PostController extends Controller
         return sendResponse(PostResource::collection($posts), 'Posts retrieved successfully.');
     }
 
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -422,11 +428,98 @@ class PostController extends Controller
             $success = new PostResource($post);
             $message = 'Yay! A post has been successfully created.';
         } catch (Exception $e) {
-            $success = false;
-            $message = $e->getMessage();
+            $success = [];
+            $message = 'Oops! Unable to create a new post.';
         }
 
         return sendResponse($success, $message);
     }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function show($id)
+    {
+        $post = Post::find($id);
+
+        if (is_null($post)) return sendError('Post not found.');
+
+        return sendResponse(new PostResource($post), 'Post retrieved successfully.');
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param Request $request
+     * @param Post    $post
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function update(Request $request, Post $post)
+    {
+        $validator = Validator::make($request->all(), [
+            'title'       => 'required|min:10',
+            'description' => 'required|min:40'
+        ]);
+
+        if ($validator->fails()) return sendError('Validation Error.', $validator->errors(), 422);
+
+        try {
+            $post->title       = $request->title;
+            $post->description = $request->description;
+            $post->save();
+
+            $success = new PostResource($post);
+            $message = 'Yay! Post has been successfully updated.';
+        } catch (Exception $e) {
+            $success = [];
+            $message = 'Oops, Failed to update the post.';
+        }
+
+        return sendResponse($success, $message);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param Post $post
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function destroy(Post $post)
+    {
+        try {
+            $post->delete();
+            return sendResponse([], 'The post has been successfully deleted.');
+        } catch (Exception $e) {
+            return sendError('Oops! Unable to delete post.');
+        }
+    }
 }
 ```
+
+Now we are ready to run full restful api and also passport api in laravel. so let's run our example so run bellow command for quick run:
+
+``php artisan serve``
+
+make sure in details api we will use following headers as listed bellow:
+
+```
+'headers' => [
+    'Accept'        => 'application/json',
+    'Authorization' => 'Bearer '.$accessToken,
+]
+```
+
+Here is Routes URL with Verb:
+
+Now simply you can run above listed url like as bellow screen shot:
+
+- **User Register API:** Verb:POST, URL: http://127.0.0.1:8000/api/v1/register
+- **User Login API:** Verb:POST, URL: http://127.0.0.1:8000/api/v1/login
+- **Post List API:** Verb:GET, URL: http://127.0.0.1:8000/api/v1/posts
+- **Post Create API:** Verb:POST, URL: http://127.0.0.1:8000/api/v1/posts
+- **Single Post Show API:** Verb:GET, URL: http://127.0.0.1:8000/api/v1/posts/{id}
+- **Post Update API:** Verb:PUT, URL: http://127.0.0.1:8000/api/v1/posts/{id}
+- **Post Delete API:** Verb:DELETE, URL: http://127.0.0.1:8000/api/v1/posts/{id}

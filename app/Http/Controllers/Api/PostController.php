@@ -46,10 +46,72 @@ class PostController extends Controller
             $success = new PostResource($post);
             $message = 'Yay! A post has been successfully created.';
         } catch (Exception $e) {
-            $success = false;
-            $message = $e->getMessage();
+            $success = [];
+            $message = 'Oops! Unable to create a new post.';
         }
 
         return sendResponse($success, $message);
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function show($id)
+    {
+        $post = Post::find($id);
+
+        if (is_null($post)) return sendError('Post not found.');
+
+        return sendResponse(new PostResource($post), 'Post retrieved successfully.');
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param Request $request
+     * @param Post    $post
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function update(Request $request, Post $post)
+    {
+        $validator = Validator::make($request->all(), [
+            'title'       => 'required|min:10',
+            'description' => 'required|min:40'
+        ]);
+
+        if ($validator->fails()) return sendError('Validation Error.', $validator->errors(), 422);
+
+        try {
+            $post->title       = $request->title;
+            $post->description = $request->description;
+            $post->save();
+
+            $success = new PostResource($post);
+            $message = 'Yay! Post has been successfully updated.';
+        } catch (Exception $e) {
+            $success = [];
+            $message = 'Oops, Failed to update the post.';
+        }
+
+        return sendResponse($success, $message);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param Post $post
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function destroy(Post $post)
+    {
+        try {
+            $post->delete();
+            return sendResponse([], 'The post has been successfully deleted.');
+        } catch (Exception $e) {
+            return sendError('Oops! Unable to delete post.');
+        }
     }
 }

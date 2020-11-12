@@ -66,8 +66,8 @@ class LoginController extends Controller
             $message          = 'Yay! A user has been successfully created.';
             $success['token'] = $user->createToken('accessToken')->accessToken;
         } catch (Exception $e) {
-            $success['token'] = false;
-            $message          = $e->getMessage();
+            $success['token'] = [];
+            $message          = 'Oops! Unable to create a new user.';
         }
 
         return sendResponse($success, $message);
