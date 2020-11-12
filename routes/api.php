@@ -15,10 +15,11 @@ use App\Http\Controllers\Api\PostController;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
+Route::prefix('v1')->group(function () {
+    Route::post('login', [LoginController::class, 'login']);
+    Route::post('register', [LoginController::class, 'register']);
 
-Route::post('login', [LoginController::class, 'login']);
-Route::post('register', [LoginController::class, 'register']);
-
-Route::middleware('auth:api')->group(function () {
-    Route::resource('posts', PostController::class);
+    Route::middleware('auth:api')->group(function () {
+        Route::resource('posts', PostController::class);
+    });
 });
