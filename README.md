@@ -340,3 +340,93 @@ class LoginController extends Controller
 }
 ```
 
+#### Step 9: Create Eloquent API Resources
+
+This is a very important step of creating rest api in laravel 8. you can use eloquent api resources with api. it will help you to make same response layout of your model object. we used in PostController file. now we have to create it using following command:
+
+``php artisan make:resource PostResource``
+
+Now there created a new file with a new folder on following path:
+
+``app/Http/Resources/Post.php``
+
+```
+<?php
+
+namespace App\Http\Resources;
+
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class PostResource extends JsonResource
+{
+    /**
+     * Transform the resource into an array.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return array
+     */
+    public function toArray($request)
+    {
+        return [
+            'id'          => $this->id,
+            'title'       => $this->title,
+            'description' => $this->description,
+            'created_at'  => $this->created_at->format('d-m-Y')
+        ];
+    }
+}
+```
+
+**app\Http\Controllers\Api\PostController.php**
+
+```
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Http\Resources\PostResource;
+use App\Models\Post;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Exception;
+
+class PostController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function index()
+    {
+        $posts = Post::all();
+
+        return sendResponse(PostResource::collection($posts), 'Posts retrieved successfully.');
+    }
+
+    public function store(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'title'       => 'required|min:10',
+            'description' => 'required|min:40'
+        ]);
+
+        if ($validator->fails()) return sendError('Validation Error.', $validator->errors(), 422);
+
+        try {
+            $post    = Post::create([
+                'title'       => $request->title,
+                'description' => $request->description
+            ]);
+            $success = new PostResource($post);
+            $message = 'Yay! A post has been successfully created.';
+        } catch (Exception $e) {
+            $success = false;
+            $message = $e->getMessage();
+        }
+
+        return sendResponse($success, $message);
+    }
+}
+```
