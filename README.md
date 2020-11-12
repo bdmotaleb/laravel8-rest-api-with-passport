@@ -95,3 +95,63 @@ Finally, in your `config/auth.php` configuration file, you should set the `drive
     ],
 ],
 ```
+
+#### Step 5: Add Post Table and Model
+
+next, we require to create migration & model for posts table using Laravel 8 php artisan command, so first fire bellow command:  
+``php artisan make:model Post -m``  
+After this command you will find one file in following path database/migrations and you have to put bellow code in your migration file for create posts table.
+```
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+class CreatePostsTable extends Migration
+{
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up()
+    {
+        Schema::create('posts', function (Blueprint $table) {
+            $table->id();
+            $table->string('title');
+            $table->text('description');
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     *
+     * @return void
+     */
+    public function down()
+    {
+        Schema::dropIfExists('posts');
+    }
+}
+```
+After create migration we need to run above migration by following command:  
+``php artisan migrate``
+
+**app/Models/Post.php**
+```
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Post extends Model
+{
+    use HasFactory;
+
+    protected $fillable = ['title', 'description'];
+}
+```
