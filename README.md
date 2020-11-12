@@ -155,3 +155,43 @@ class Post extends Model
     protected $fillable = ['title', 'description'];
 }
 ```
+
+#### Step 6: Create Controller Files
+
+in next step, now we have created a new controller as LoginController and PostController:
+
+``php artisan make:controller Api/LoginController``
+
+``php artisan make:controller Api/PostController``
+
+#### Step 7: Create API Routes
+In this step, we will create api routes. Laravel provide api.php file for write web services route. So, let's add new route on that file.
+
+**routes/api.php**
+
+```
+<?php
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\LoginController;
+use App\Http\Controllers\Api\PostController;
+
+/*
+|--------------------------------------------------------------------------
+| API Routes
+|--------------------------------------------------------------------------
+|
+| Here is where you can register API routes for your application. These
+| routes are loaded by the RouteServiceProvider within a group which
+| is assigned the "api" middleware group. Enjoy building your API!
+|
+*/
+
+Route::post('login', [LoginController::class, 'login']);
+Route::post('register', [LoginController::class, 'register']);
+
+Route::middleware('auth:api')->group(function () {
+    Route::resource('posts', PostController::class);
+});
+```
